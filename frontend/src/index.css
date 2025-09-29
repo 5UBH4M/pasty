@@ -1,0 +1,93 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import "tailwindcss";
+
+* {
+    font-family: "Poppins", sans-serif;
+}
+
+/* Monospace font for code elements */
+code,
+pre,
+.font-mono,
+textarea[class*="font-mono"],
+[style*="font-mono"],
+.code-display {
+    font-family: "JetBrains Mono", "Fira Code", "Monaco", "Cascadia Code", "Roboto Mono", "Courier New", monospace !important;
+}
+
+:root {
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
+    --secondary-color: #374151;
+    --secondary-hover: #4b5563;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --info-color: #06b6d4;
+
+    --background: #0a0a0a;
+    --foreground: #ffffff;
+    --card-bg: #111111;
+    --border-color: #262626;
+    --muted: #525252;
+    --muted-foreground: #a3a3a3;
+    --input-bg: #171717;
+    --hover-bg: rgba(255, 255, 255, 0.05);
+
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Input and textarea placeholder styling */
+input::placeholder,
+textarea::placeholder {
+    color: var(--muted) !important;
+}
+
+/* Focus ring styling */
+input:focus,
+textarea:focus {
+    box-shadow: 0 0 0 2px var(--primary-color) !important;
+}
+
+/* Button hover effects */
+button:hover:not(:disabled) {
+    background-color: var(--primary-hover) !important;
+}
+
+/* React Toastify custom styling */
+.Toastify__toast {
+    background-color: var(--card-bg) !important;
+    color: var(--foreground) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
+}
+
+.Toastify__toast--success {
+    border-left: 4px solid var(--success-color) !important;
+}
+
+.Toastify__toast--error {
+    border-left: 4px solid var(--danger-color) !important;
+}
+
+.Toastify__toast--info {
+    border-left: 4px solid var(--info-color) !important;
+}
+
+.Toastify__toast--warning {
+    border-left: 4px solid var(--warning-color) !important;
+}
+
+.Toastify__progress-bar {
+    background: var(--primary-color) !important;
+}
+
+.Toastify__close-button {
+    color: var(--muted-foreground) !important;
+}
+
+.Toastify__close-button:hover {
+    color: var(--foreground) !important;
+}
