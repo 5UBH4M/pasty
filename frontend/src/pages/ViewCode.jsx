@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Copy, Eye, Calendar, FileText, Plus, Clock } from "lucide-react";
+import { Copy, Eye, Calendar, FileText, Plus, Search } from "lucide-react";
 import { toast } from "react-toastify";
 import api from "../services/api";
 
@@ -110,6 +110,28 @@ export default function ViewCode() {
                                 <div className="flex items-center gap-1">
                                     <Eye className="w-4 h-4" />
                                     ID: {gist.id}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigator.clipboard.writeText(gist.id);
+                                            toast.success("ID copied!");
+                                        }}
+                                        className="ml-1 p-1 rounded transition-colors"
+                                        style={{
+                                            backgroundColor: "var(--secondary-color)",
+                                            border: "1px solid var(--border-color)",
+                                            cursor: "pointer",
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.target.style.backgroundColor = "var(--secondary-hover)";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.backgroundColor = "var(--secondary-color)";
+                                        }}
+                                        title="Copy ID"
+                                    >
+                                        <Copy className="w-3 h-3" />
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -149,8 +171,8 @@ export default function ViewCode() {
                                     e.target.style.backgroundColor = "var(--secondary-color)";
                                 }}
                             >
-                                <Clock className="w-4 h-4" />
-                                Recent
+                                <Search className="w-4 h-4" />
+                                Search
                             </Link>
                         </div>
                     </div>

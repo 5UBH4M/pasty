@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Link as LinkIcon, Clipboard, Clock } from "lucide-react";
+import { Link as LinkIcon, Clipboard, Search } from "lucide-react";
 import { toast } from "react-toastify";
 import api from "../services/api";
 
@@ -107,8 +107,8 @@ export default function CreateCode() {
                                 e.target.style.backgroundColor = "var(--secondary-color)";
                             }}
                         >
-                            <Clock className="w-4 h-4" />
-                            Recent Pastes
+                            <Search className="w-4 h-4" />
+                            Search
                         </Link>
                     </div>
 
