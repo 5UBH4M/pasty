@@ -84,6 +84,25 @@ export default function ViewCode() {
         }
     };
 
+    const downloadFile = async (url, filename) => {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Download failed");
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = blobUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error("Download error:", error);
+            toast.error("Failed to download file");
+        }
+    };
+
     if (isLoading) {
         return (
             <div
@@ -311,22 +330,33 @@ export default function ViewCode() {
                                 {gist.screenshots.map((screenshot, index) => (
                                     <div
                                         key={index}
-                                        className="relative rounded-md overflow-hidden cursor-pointer group"
+                                        className="relative rounded-md overflow-hidden group"
                                         style={{ border: "1px solid var(--border-color)" }}
-                                        onClick={() => setLightboxIndex(index)}
                                     >
                                         <img
                                             src={api.getScreenshotUrl(gist.id, index)}
                                             alt={screenshot.name}
-                                            className="w-full h-40 object-cover transition-transform group-hover:scale-105"
+                                            className="w-full h-40 object-cover cursor-pointer transition-transform group-hover:scale-105"
                                             loading="lazy"
+                                            onClick={() => setLightboxIndex(index)}
                                         />
                                         <div
-                                            className="absolute bottom-0 left-0 right-0 text-xs px-2 py-1 truncate"
+                                            className="absolute bottom-0 left-0 right-0 text-xs px-2 py-1 truncate pointer-events-none"
                                             style={{ backgroundColor: "rgba(0,0,0,0.6)", color: "white" }}
                                         >
                                             {screenshot.name} · {(screenshot.size / 1024).toFixed(0)}KB
                                         </div>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                downloadFile(api.getScreenshotUrl(gist.id, index), screenshot.name);
+                                            }}
+                                            className="absolute top-2 right-2 p-1.5 rounded opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shadow-md"
+                                            style={{ backgroundColor: "var(--primary-color)", color: "var(--foreground)" }}
+                                            title="Download Image"
+                                        >
+                                            <Download className="w-4 h-4" />
+                                        </button>
                                     </div>
                                 ))}
                             </div>
@@ -361,21 +391,20 @@ export default function ViewCode() {
                                             <span className="text-sm truncate" style={{ color: "var(--foreground)" }}>{file.name}</span>
                                             <span className="text-xs shrink-0" style={{ color: "var(--muted-foreground)" }}>{formatSize(file.size)}</span>
                                         </div>
-                                        <a
-                                            href={api.getFileUrl(gist.id, index)}
-                                            download={file.name}
-                                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors shrink-0 ml-2"
+                                        <button
+                                            onClick={() => downloadFile(api.getFileUrl(gist.id, index), file.name)}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors shrink-0 ml-2 cursor-pointer"
                                             style={{
                                                 backgroundColor: "var(--primary-color)",
                                                 color: "var(--foreground)",
-                                                textDecoration: "none",
+                                                border: "none"
                                             }}
                                             onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--primary-hover)"; }}
                                             onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--primary-color)"; }}
                                         >
                                             <Download className="w-3.5 h-3.5" />
                                             Download
-                                        </a>
+                                        </button>
                                     </div>
                                 ))}
                             </div>
@@ -398,14 +427,14 @@ export default function ViewCode() {
             {/* Lightbox Modal */}
             {lightboxIndex !== null && gist.screenshots && gist.screenshots[lightboxIndex] && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                    style={{ backgroundColor: "rgba(0,0,0,0.85)" }}
+                    className="fixed inset-0 flex items-center justify-center p-4"
+                    style={{ backgroundColor: "rgba(0,0,0,0.85)", zIndex: 60 }}
                     onClick={() => setLightboxIndex(null)}
                 >
                     <button
-                        className="absolute top-4 right-4 p-2 rounded-full"
+                        className="absolute top-4 right-4 p-2 rounded-full cursor-pointer hover:bg-white/20 transition-colors"
                         style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "white" }}
-                        onClick={() => setLightboxIndex(null)}
+                        onClick={(e) => { e.stopPropagation(); setLightboxIndex(null); }}
                     >
                         <X className="w-6 h-6" />
                     </button>
@@ -416,10 +445,23 @@ export default function ViewCode() {
                         onClick={(e) => e.stopPropagation()}
                     />
                     <div
-                        className="absolute bottom-4 text-center text-sm"
+                        className="absolute bottom-4 flex flex-col items-center gap-2"
                         style={{ color: "rgba(255,255,255,0.7)" }}
                     >
-                        {gist.screenshots[lightboxIndex].name} · {lightboxIndex + 1}/{gist.screenshots.length}
+                        <div className="text-sm">
+                            {gist.screenshots[lightboxIndex].name} · {lightboxIndex + 1}/{gist.screenshots.length}
+                        </div>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                downloadFile(api.getScreenshotUrl(gist.id, lightboxIndex), gist.screenshots[lightboxIndex].name);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
+                            style={{ backgroundColor: "var(--primary-color)", color: "var(--foreground)" }}
+                        >
+                            <Download className="w-4 h-4" />
+                            Download
+                        </button>
                     </div>
                 </div>
             )}
