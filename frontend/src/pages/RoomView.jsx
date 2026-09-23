@@ -193,16 +193,28 @@ export default function RoomView() {
                                 <span className="px-1.5 py-0.5 rounded text-xs" style={{ backgroundColor: "var(--secondary-color)", border: "1px solid var(--border-color)" }}>{formatTTL(room.ttlHours)}</span>
                             </div>
                         </div>
-                        <button
-                            onClick={() => setShowForm((p) => !p)}
-                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
-                            style={{ backgroundColor: "var(--primary-color)", color: "var(--foreground)" }}
-                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--primary-hover)"; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--primary-color)"; }}
-                        >
-                            <Plus className="w-4 h-4" />
-                            Add Entry
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <Link
+                                to="/"
+                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
+                                style={{ backgroundColor: "var(--secondary-color)", color: "var(--foreground)", border: "1px solid var(--border-color)", textDecoration: "none" }}
+                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--secondary-hover)"; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--secondary-color)"; }}
+                            >
+                                <X className="w-4 h-4" />
+                                Leave
+                            </Link>
+                            <button
+                                onClick={() => setShowForm((p) => !p)}
+                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
+                                style={{ backgroundColor: "var(--primary-color)", color: "var(--foreground)" }}
+                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--primary-hover)"; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--primary-color)"; }}
+                            >
+                                <Plus className="w-4 h-4" />
+                                Add Entry
+                            </button>
+                        </div>
                     </div>
 
                     {/* Storage bar */}

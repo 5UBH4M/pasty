@@ -187,17 +187,27 @@ export default function CreateCode() {
             style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}
         >
             <div className="w-full max-w-4xl px-4 py-8">
+                <h1
+                    className="text-center text-3xl sm:text-5xl font-bold tracking-[0.3em] sm:tracking-[0.5em] mb-6 sm:mb-8 select-none"
+                    style={{
+                        color: "var(--primary-color)",
+                        textShadow: "0 0 30px rgba(139, 92, 246, 0.3)",
+                        textIndent: "0.3em",
+                    }}
+                >
+                    PASTY
+                </h1>
                 <div className="space-y-6">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
-                            <h1 className="text-3xl font-bold mb-2" style={{ color: "var(--foreground)" }}>
+                            <h1 className="text-xl sm:text-3xl font-bold mb-1 sm:mb-2" style={{ color: "var(--foreground)" }}>
                                 Create New Code Share
                             </h1>
-                            <p style={{ color: "var(--muted-foreground)" }}>Share your code with your classmates easily</p>
+                            <p className="text-sm sm:text-base" style={{ color: "var(--muted-foreground)" }}>Share your code with your classmates easily</p>
                         </div>
                         <Link
                             to="/recent"
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-md transition-colors text-sm font-medium"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-md transition-colors text-sm font-medium self-start sm:self-auto"
                             style={{
                                 backgroundColor: "var(--secondary-color)",
                                 color: "var(--foreground)",
@@ -218,12 +228,11 @@ export default function CreateCode() {
 
                     {/* Room Bar */}
                     <div
-                        className="rounded-lg p-4 flex items-center gap-3 flex-wrap"
+                        className="rounded-lg p-3 sm:p-4 flex items-center gap-2 sm:gap-3 flex-wrap"
                         style={{ backgroundColor: "var(--card-bg)", border: "1px solid var(--border-color)", boxShadow: "var(--shadow)" }}
                     >
                         <Users className="w-5 h-5" style={{ color: "var(--primary-color)" }} />
-                        <span className="text-sm font-medium" style={{ color: "var(--foreground)" }}>Rooms</span>
-                        <div className="flex-1" />
+                        <span className="text-sm font-medium mr-auto" style={{ color: "var(--foreground)" }}>Rooms</span>
 
                         {/* Join */}
                         <div className="flex items-center gap-1.5">
@@ -461,7 +470,7 @@ export default function CreateCode() {
                         </div>
 
                         {/* Footer: stats + buttons */}
-                        <div className="flex justify-between items-center pt-4">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pt-4">
                             <div className="text-sm" style={{ color: "var(--muted-foreground)" }}>
                                 {code.length.toLocaleString()} chars
                                 {(screenshots.length > 0 || uploadFiles.length > 0) && (
@@ -470,15 +479,14 @@ export default function CreateCode() {
                                     </span>
                                 )}
                             </div>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
                                 <button
                                     onClick={handlePaste}
-                                    className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 py-2 gap-2 transition-colors focus:outline-none focus:ring-2"
+                                    className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 py-2 gap-2 transition-colors focus:outline-none focus:ring-2 flex-1 sm:flex-none"
                                     style={{
                                         backgroundColor: "var(--secondary-color)",
                                         color: "var(--foreground)",
                                         border: "1px solid var(--border-color)",
-                                        minWidth: "120px",
                                     }}
                                     onMouseEnter={(e) => {
                                         e.target.style.backgroundColor = "var(--secondary-hover)";
@@ -488,18 +496,17 @@ export default function CreateCode() {
                                     }}
                                 >
                                     <Clipboard className="w-4 h-4" />
-                                    Paste Code
+                                    Paste
                                 </button>
 
                                 <button
                                     onClick={handleCreate}
                                     disabled={isCreating}
-                                    className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 py-2 gap-2 transition-colors focus:outline-none focus:ring-2"
+                                    className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 py-2 gap-2 transition-colors focus:outline-none focus:ring-2 flex-1 sm:flex-none"
                                     style={{
                                         backgroundColor: isCreating ? "var(--muted)" : "var(--primary-color)",
                                         color: "var(--foreground)",
                                         cursor: isCreating ? "not-allowed" : "pointer",
-                                        minWidth: "120px",
                                     }}
                                     onMouseEnter={(e) => {
                                         if (!isCreating) {
