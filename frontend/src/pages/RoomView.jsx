@@ -59,12 +59,20 @@ export default function RoomView() {
 
     const toggleExpand = (id) => setExpandedEntries((p) => ({ ...p, [id]: !p[id] }));
 
-    const fetchRoom = async () => {
+    const fetchRoomBackground = async () => {
         try {
-            setLoading(true);
             const result = await api.getRoom(code);
             setRoom(result.data);
             setError(null);
+        } catch (err) {
+            console.error("Background fetch failed", err);
+        }
+    };
+
+    const fetchRoom = async () => {
+        try {
+            setLoading(true);
+            await fetchRoomBackground();
         } catch (err) {
             setError(err.message);
         } finally {
@@ -74,6 +82,13 @@ export default function RoomView() {
 
     useEffect(() => {
         fetchRoom();
+        
+        // Polling: refresh room data in background every 5 seconds
+        const intervalId = setInterval(() => {
+            fetchRoomBackground();
+        }, 5000);
+
+        return () => clearInterval(intervalId);
     }, [code]);
 
     // Upload handlers
@@ -181,22 +196,22 @@ export default function RoomView() {
 
                 {/* Room Header */}
                 <div className="rounded-lg p-5" style={{ backgroundColor: "var(--card-bg)", border: "1px solid var(--border-color)", boxShadow: "var(--shadow)" }}>
-                    <div className="flex justify-between items-start mb-4">
-                        <div>
-                            <h1 className="text-xl font-bold" style={{ color: "var(--foreground)" }}>{room.name}</h1>
-                            <div className="flex items-center gap-3 mt-1 text-sm" style={{ color: "var(--muted-foreground)" }}>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                        <div className="w-full sm:w-auto">
+                            <h1 className="text-xl font-bold truncate" style={{ color: "var(--foreground)" }}>{room.name}</h1>
+                            <div className="flex flex-wrap items-center gap-2 mt-2 text-sm" style={{ color: "var(--muted-foreground)" }}>
                                 <span className="font-mono px-2 py-0.5 rounded" style={{ backgroundColor: "var(--input-bg)", border: "1px solid var(--border-color)" }}>
                                     {room.code}
                                 </span>
-                                <button onClick={() => copyCode(room.code)} className="hover:underline cursor-pointer" style={{ color: "var(--primary-color)" }}>Copy Code</button>
-                                <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{getTimeRemaining(room.expiresAt)}</span>
-                                <span className="px-1.5 py-0.5 rounded text-xs" style={{ backgroundColor: "var(--secondary-color)", border: "1px solid var(--border-color)" }}>{formatTTL(room.ttlHours)}</span>
+                                <button onClick={() => copyCode(room.code)} className="hover:underline cursor-pointer" style={{ color: "var(--primary-color)" }}>Copy</button>
+                                <span className="flex items-center gap-1 ml-1"><Clock className="w-3.5 h-3.5" />{getTimeRemaining(room.expiresAt)}</span>
+                                <span className="px-1.5 py-0.5 rounded text-xs ml-1" style={{ backgroundColor: "var(--secondary-color)", border: "1px solid var(--border-color)" }}>{formatTTL(room.ttlHours)}</span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
                             <Link
                                 to="/"
-                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
+                                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
                                 style={{ backgroundColor: "var(--secondary-color)", color: "var(--foreground)", border: "1px solid var(--border-color)", textDecoration: "none" }}
                                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--secondary-hover)"; }}
                                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--secondary-color)"; }}
@@ -206,7 +221,7 @@ export default function RoomView() {
                             </Link>
                             <button
                                 onClick={() => setShowForm((p) => !p)}
-                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
+                                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
                                 style={{ backgroundColor: "var(--primary-color)", color: "var(--foreground)" }}
                                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--primary-hover)"; }}
                                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--primary-color)"; }}
@@ -335,9 +350,9 @@ export default function RoomView() {
                     <div className="space-y-4">
                         {room.entries.map((entry) => (
                             <div key={entry.id} className="rounded-lg p-5 space-y-3" style={{ backgroundColor: "var(--card-bg)", border: "1px solid var(--border-color)", boxShadow: "var(--shadow)" }}>
-                                <div className="flex justify-between items-center">
-                                    <h3 className="font-medium" style={{ color: "var(--foreground)" }}>{entry.title}</h3>
-                                    <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-4">
+                                    <h3 className="font-medium truncate w-full sm:w-auto" style={{ color: "var(--foreground)" }}>{entry.title}</h3>
+                                    <span className="text-xs flex-shrink-0" style={{ color: "var(--muted-foreground)" }}>
                                         {new Date(entry.createdAt).toLocaleString()}
                                         {entry.entrySize > 0 && ` · ${formatSize(entry.entrySize)}`}
                                     </span>
