@@ -1,14 +1,50 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Copy, Eye, Calendar, FileText, Plus, Search } from "lucide-react";
+import { Copy, Calendar, Clock, Plus, Search, Image, Paperclip, Download, X } from "lucide-react";
 import { toast } from "react-toastify";
 import api from "../services/api";
+
+const formatTTL = (hours) => {
+    if (!hours) return "";
+    if (hours < 24) return `${hours}h`;
+    const days = Math.floor(hours / 24);
+    const rem = hours % 24;
+    return rem === 0 ? `${days}d` : `${days}d ${rem}h`;
+};
+
+const formatSize = (bytes) => {
+    if (bytes < 1024) return `${bytes}B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)}KB`;
+    return `${(bytes / 1024 / 1024).toFixed(1)}MB`;
+};
+
+function getTimeRemaining(expiresAt) {
+    const now = new Date();
+    const expiry = new Date(expiresAt);
+    const diff = expiry - now;
+
+    if (diff <= 0) return "Expired";
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (hours >= 24) {
+        const days = Math.floor(hours / 24);
+        const remainingHours = hours % 24;
+        return `${days}d ${remainingHours}h remaining`;
+    }
+    if (hours > 0) {
+        return `${hours}h ${minutes}m remaining`;
+    }
+    return `${minutes}m remaining`;
+}
 
 export default function ViewCode() {
     const { id } = useParams();
     const [gist, setGist] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [lightboxIndex, setLightboxIndex] = useState(null);
 
     useEffect(() => {
         const fetchGist = async () => {
@@ -78,7 +114,19 @@ export default function ViewCode() {
                     <h1 className="text-2xl font-bold mb-2" style={{ color: "var(--foreground)" }}>
                         Code Not Found
                     </h1>
-                    <p style={{ color: "var(--muted-foreground)" }}>{error}</p>
+                    <p className="mb-4" style={{ color: "var(--muted-foreground)" }}>{error}</p>
+                    <Link
+                        to="/"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium"
+                        style={{
+                            backgroundColor: "var(--primary-color)",
+                            color: "var(--foreground)",
+                            textDecoration: "none",
+                        }}
+                    >
+                        <Plus className="w-4 h-4" />
+                        Create New
+                    </Link>
                 </div>
             </div>
         );
@@ -98,17 +146,13 @@ export default function ViewCode() {
                             <h1 className="text-3xl font-bold mb-2" style={{ color: "var(--foreground)" }}>
                                 {gist.title || "Untitled"}
                             </h1>
-                            <div className="flex items-center gap-4 text-sm" style={{ color: "var(--muted-foreground)" }}>
-                                {/* <div className="flex items-center gap-1">
-                                    <FileText className="w-4 h-4" />
-                                    {gist.fileName}
-                                </div> */}
+                            <div className="flex items-center gap-4 text-sm flex-wrap" style={{ color: "var(--muted-foreground)" }}>
                                 <div className="flex items-center gap-1">
                                     <Calendar className="w-4 h-4" />
                                     {new Date(gist.createdAt).toLocaleDateString()}
                                 </div>
                                 <div className="flex items-center gap-1">
-                                    <Eye className="w-4 h-4" />
+                                    <Copy className="w-4 h-4" />
                                     ID: {gist.id}
                                     <button
                                         onClick={(e) => {
@@ -132,6 +176,15 @@ export default function ViewCode() {
                                     >
                                         <Copy className="w-3 h-3" />
                                     </button>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <Clock className="w-4 h-4" />
+                                    {getTimeRemaining(gist.expiresAt)}
+                                    {gist.ttlHours && (
+                                        <span className="ml-1 px-1.5 py-0.5 rounded text-xs" style={{ backgroundColor: "var(--secondary-color)", border: "1px solid var(--border-color)" }}>
+                                            {formatTTL(gist.ttlHours)}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -177,7 +230,8 @@ export default function ViewCode() {
                         </div>
                     </div>
 
-                    {/* Code Display */}
+                    {/* Code Display — only shown if paste has code */}
+                    {gist.code && (
                     <div
                         className="rounded-lg p-6 space-y-4"
                         style={{ backgroundColor: "var(--card-bg)", border: "1px solid var(--border-color)", boxShadow: "var(--shadow)" }}
@@ -239,6 +293,94 @@ export default function ViewCode() {
                             </pre>
                         </div>
                     </div>
+                    )}
+
+                    {/* Screenshots Gallery */}
+                    {gist.screenshots && gist.screenshots.length > 0 && (
+                        <div
+                            className="rounded-lg p-6 space-y-4"
+                            style={{ backgroundColor: "var(--card-bg)", border: "1px solid var(--border-color)", boxShadow: "var(--shadow)" }}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Image className="w-5 h-5" style={{ color: "var(--foreground)" }} />
+                                <h2 className="text-lg font-semibold" style={{ color: "var(--foreground)" }}>
+                                    Screenshots ({gist.screenshots.length})
+                                </h2>
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                {gist.screenshots.map((screenshot, index) => (
+                                    <div
+                                        key={index}
+                                        className="relative rounded-md overflow-hidden cursor-pointer group"
+                                        style={{ border: "1px solid var(--border-color)" }}
+                                        onClick={() => setLightboxIndex(index)}
+                                    >
+                                        <img
+                                            src={api.getScreenshotUrl(gist.id, index)}
+                                            alt={screenshot.name}
+                                            className="w-full h-40 object-cover transition-transform group-hover:scale-105"
+                                            loading="lazy"
+                                        />
+                                        <div
+                                            className="absolute bottom-0 left-0 right-0 text-xs px-2 py-1 truncate"
+                                            style={{ backgroundColor: "rgba(0,0,0,0.6)", color: "white" }}
+                                        >
+                                            {screenshot.name} · {(screenshot.size / 1024).toFixed(0)}KB
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+
+                    {/* Files */}
+                    {gist.files && gist.files.length > 0 && (
+                        <div
+                            className="rounded-lg p-6 space-y-3"
+                            style={{ backgroundColor: "var(--card-bg)", border: "1px solid var(--border-color)", boxShadow: "var(--shadow)" }}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Paperclip className="w-5 h-5" style={{ color: "var(--foreground)" }} />
+                                <h2 className="text-lg font-semibold" style={{ color: "var(--foreground)" }}>
+                                    Files ({gist.files.length})
+                                </h2>
+                            </div>
+                            <div className="space-y-1.5">
+                                {gist.files.map((file, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-center justify-between rounded-md px-3 py-2.5"
+                                        style={{
+                                            backgroundColor: "var(--input-bg)",
+                                            border: "1px solid var(--border-color)",
+                                        }}
+                                    >
+                                        <div className="flex items-center gap-2 min-w-0">
+                                            <Paperclip className="w-4 h-4 shrink-0" style={{ color: "var(--muted-foreground)" }} />
+                                            <span className="text-sm truncate" style={{ color: "var(--foreground)" }}>{file.name}</span>
+                                            <span className="text-xs shrink-0" style={{ color: "var(--muted-foreground)" }}>{formatSize(file.size)}</span>
+                                        </div>
+                                        <a
+                                            href={api.getFileUrl(gist.id, index)}
+                                            download={file.name}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors shrink-0 ml-2"
+                                            style={{
+                                                backgroundColor: "var(--primary-color)",
+                                                color: "var(--foreground)",
+                                                textDecoration: "none",
+                                            }}
+                                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--primary-hover)"; }}
+                                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--primary-color)"; }}
+                                        >
+                                            <Download className="w-3.5 h-3.5" />
+                                            Download
+                                        </a>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Footer Info */}
                     <div
@@ -246,12 +388,41 @@ export default function ViewCode() {
                         style={{ backgroundColor: "var(--card-bg)", border: "1px solid var(--border-color)" }}
                     >
                         <p style={{ color: "var(--muted-foreground)" }}>
-                            This code snippet was created on {new Date(gist.createdAt).toLocaleString()} and will expire on{" "}
-                            {new Date(gist.expiresAt).toLocaleString()}.
+                            Created on {new Date(gist.createdAt).toLocaleString()} · Expires on{" "}
+                            {new Date(gist.expiresAt).toLocaleString()}
                         </p>
                     </div>
                 </div>
             </div>
+
+            {/* Lightbox Modal */}
+            {lightboxIndex !== null && gist.screenshots && gist.screenshots[lightboxIndex] && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    style={{ backgroundColor: "rgba(0,0,0,0.85)" }}
+                    onClick={() => setLightboxIndex(null)}
+                >
+                    <button
+                        className="absolute top-4 right-4 p-2 rounded-full"
+                        style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "white" }}
+                        onClick={() => setLightboxIndex(null)}
+                    >
+                        <X className="w-6 h-6" />
+                    </button>
+                    <img
+                        src={api.getScreenshotUrl(gist.id, lightboxIndex)}
+                        alt={gist.screenshots[lightboxIndex].name}
+                        className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                    <div
+                        className="absolute bottom-4 text-center text-sm"
+                        style={{ color: "rgba(255,255,255,0.7)" }}
+                    >
+                        {gist.screenshots[lightboxIndex].name} · {lightboxIndex + 1}/{gist.screenshots.length}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

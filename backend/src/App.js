@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./db/connectToDB.js";
 import gistRoutes from "./routes/gistRoutes.js";
+import roomRoutes from "./routes/roomRoutes.js";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/gists", gistRoutes);
+app.use("/api/rooms", roomRoutes);
 
 app.get("/health", (req, res) => {
     res.status(200).json({

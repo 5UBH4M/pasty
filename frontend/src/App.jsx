@@ -4,6 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import CreateCode from "./pages/CreateCode";
 import ViewCode from "./pages/ViewCode";
 import RecentPastes from "./pages/RecentPastes";
+import RoomView from "./pages/RoomView";
 
 function App() {
     return (
@@ -12,6 +13,7 @@ function App() {
                 <Route path="/" element={<CreateCode />} />
                 <Route path="/recent" element={<RecentPastes />} />
                 <Route path="/code/:id" element={<ViewCode />} />
+                <Route path="/room/:code" element={<RoomView />} />
             </Routes>
             <ToastContainer
                 position="top-right"

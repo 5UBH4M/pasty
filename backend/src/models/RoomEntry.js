@@ -1,22 +1,10 @@
 import mongoose from "mongoose";
 
-const MIN_TTL_HOURS = 1;
-const MAX_TTL_HOURS = 168; // 7 days
-
-export { MIN_TTL_HOURS, MAX_TTL_HOURS };
-
-const GistSchema = new mongoose.Schema({
-    id: {
+const RoomEntrySchema = new mongoose.Schema({
+    roomCode: {
         type: String,
         required: true,
-        unique: true,
-        minlength: 4,
-        maxlength: 4,
-    },
-    code: {
-        type: String,
-        default: "",
-        maxLength: 100000,
+        index: true,
     },
     title: {
         type: String,
@@ -24,11 +12,10 @@ const GistSchema = new mongoose.Schema({
         maxLength: 100,
         trim: true,
     },
-    fileName: {
+    code: {
         type: String,
-        default: "untitled.txt",
-        maxLength: 50,
-        trim: true,
+        default: "",
+        maxLength: 100000,
     },
     screenshots: [{
         data: { type: Buffer, required: true },
@@ -42,11 +29,9 @@ const GistSchema = new mongoose.Schema({
         name: { type: String, required: true },
         size: { type: Number, required: true },
     }],
-    ttlHours: {
+    entrySize: {
         type: Number,
-        min: MIN_TTL_HOURS,
-        max: MAX_TTL_HOURS,
-        default: MAX_TTL_HOURS,
+        default: 0,
     },
     createdAt: {
         type: Date,
@@ -58,9 +43,8 @@ const GistSchema = new mongoose.Schema({
     },
 });
 
-// Create index for automatic cleanup of expired documents
-GistSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+RoomEntrySchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-const Gist = mongoose.models.Gist || mongoose.model("Gist", GistSchema);
+const RoomEntry = mongoose.models.RoomEntry || mongoose.model("RoomEntry", RoomEntrySchema);
 
-export default Gist;
+export default RoomEntry;
